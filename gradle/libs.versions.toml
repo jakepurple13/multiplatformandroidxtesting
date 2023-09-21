@@ -21,6 +21,8 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 ktor-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor.version" }
 ktor-jvm = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor.version" }
 ktor-ios = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor.version" }
+ktor-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor.version" }
+ktor-serialization = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor.version" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.6.1" }
 androidx-core = { module = "androidx.core:core-ktx", version = "1.12.0" }
 androidx-activity-compose = "androidx.activity:activity-compose:1.7.2"

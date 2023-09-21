@@ -45,13 +45,13 @@ kotlin {
                 api(compose.foundation)
                 api(compose.materialIconsExtended)
                 api(compose.material3)
-                implementation(libs.ktor.core)
+                api(libs.ktor.core)
+                api(libs.ktor.content.negotiation)
+                api(libs.ktor.serialization)
                 api(libs.datastore.core)
                 api(libs.datastore.preferences)
                 api(libs.paging.runtime)
                 //api(libs.paging.compose)
-                api("io.ktor:ktor-client-content-negotiation:${libs.versions.ktor.version.get()}")
-                api("io.ktor:ktor-serialization-kotlinx-json:${libs.versions.ktor.version.get()}")
                 api(libs.kamel.image)
                 api(libs.kotlinx.datetime)
                 api(libs.kotlinx.coroutines.core)
@@ -68,14 +68,14 @@ kotlin {
             dependencies {
                 api(libs.androidx.appcompat)
                 api(libs.androidx.core)
-                implementation(libs.ktor.jvm)
+                api(libs.ktor.jvm)
             }
         }
 
         val desktopMain by getting {
             dependencies {
                 api(compose.preview)
-                implementation(libs.ktor.jvm)
+                api(libs.ktor.jvm)
             }
         }
 
@@ -87,7 +87,7 @@ kotlin {
         val iosSimulatorArm64Main by getting
         val iosMain by getting {
             dependencies {
-                implementation(libs.ktor.ios)
+                api(libs.ktor.ios)
             }
             iosX64Main.dependsOn(this)
             iosArm64Main.dependsOn(this)
