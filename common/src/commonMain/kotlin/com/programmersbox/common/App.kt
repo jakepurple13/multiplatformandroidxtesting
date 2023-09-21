@@ -100,6 +100,7 @@ fun ATLAScreen() {
 
             items(
                 count = lazyPagingItems.itemCount,
+                contentType = lazyPagingItems.itemContentType()
             ) {
                 lazyPagingItems[it]
                     ?.let { character -> AvatarCard(character, switch) }
@@ -151,16 +152,8 @@ fun AvatarCard(item: Beer, showDescription: Boolean) {
 fun AvatarPlaceholderCard() {
     Card {
         ListItem(
-            headlineContent = {
-                Text(
-                    "",
-                )
-            },
-            supportingContent = {
-                Text(
-                    "",
-                )
-            },
+            headlineContent = { Text("") },
+            supportingContent = { Text("") },
             leadingContent = {
                 Box(
                     modifier = Modifier

@@ -1,28 +1,16 @@
 package com.programmersbox.common
 
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.paging.CombinedLoadStates
-import androidx.paging.DifferCallback
-import androidx.paging.ItemSnapshotList
-import androidx.paging.LoadState
-import androidx.paging.LoadStates
-import androidx.paging.NullPaddedList
-import androidx.paging.PagingData
-import androidx.paging.PagingDataDiffer
+import androidx.compose.runtime.*
+import androidx.paging.*
 import kotlinx.coroutines.Dispatchers
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 /**
  * The class responsible for accessing the data from a [Flow] of [PagingData].
@@ -238,3 +226,36 @@ public fun <T : Any> Flow<PagingData<T>>.collectAsLazyPagingItems(
 
     return lazyPagingItems
 }
+
+/**
+ * Returns a factory for the content type of the item.
+ *
+ * ContentTypes are generated with the contentType lambda that is passed in. If null is passed in,
+ * contentType of all items will default to `null`.
+ * If [PagingConfig.enablePlaceholders] is true, LazyPagingItems may return null items. Null
+ * items will automatically default to placeholder contentType.
+ *
+ * This factory can be applied to Lazy foundations such as [LazyGridScope.items] or Pagers.
+ * Examples:
+ * @sample androidx.paging.compose.samples.PagingWithLazyGrid
+ * @sample androidx.paging.compose.samples.PagingWithLazyList
+ *
+ * @param [contentType] a factory of the content types for the item. The item compositions of
+ * the same type could be reused more efficiently. Note that null is a valid type and items of
+ * such type will be considered compatible.
+ */
+@Suppress("PrimitiveInLambda")
+public fun <T : Any> LazyPagingItems<T>.itemContentType(
+    contentType: ((item: T) -> Any?)? = null,
+): (index: Int) -> Any? {
+    return { index ->
+        if (contentType == null) {
+            null
+        } else {
+            val item = peek(index)
+            if (item == null) PagingPlaceholderContentType else contentType(item)
+        }
+    }
+}
+
+internal object PagingPlaceholderContentType
