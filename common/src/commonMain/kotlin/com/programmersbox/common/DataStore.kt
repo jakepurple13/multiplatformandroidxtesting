@@ -1,6 +1,9 @@
 package com.programmersbox.common
 
-import androidx.datastore.preferences.core.*
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -10,7 +13,7 @@ import okio.Path.Companion.toPath
 object DataStore {
     private val dataStore = PreferenceDataStoreFactory.createWithPath { "androidx.preferences_pb".toPath() }
 
-    val switch = DataStoreType(booleanPreferencesKey("switch"))
+    val switch = DataStoreTypeNonNull(booleanPreferencesKey("switch"))
 
     open class DataStoreType<T>(
         protected val key: Preferences.Key<T>,

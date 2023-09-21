@@ -7,8 +7,8 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 
 class AvatarApiService {
     companion object {
@@ -41,5 +41,5 @@ data class Beer(
     val name: String,
     val description: String,
     @SerialName("image_url")
-    val imageUrl: String,
+    val imageUrl: String?,
 )

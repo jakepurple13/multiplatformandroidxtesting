@@ -1,5 +1,6 @@
 package com.programmersbox.common
 
+import androidx.compose.animation.*
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -7,21 +8,21 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.TextDecrease
+import androidx.compose.material.icons.filled.TextIncrease
 import androidx.compose.material3.*
-import androidx.compose.material3.ListItem
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import androidx.paging.*
+import androidx.paging.LoadState
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.cachedIn
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 
 @Composable
 internal fun App() {
@@ -36,13 +37,13 @@ class AvatarViewModel {
     private val viewModelScope = CoroutineScope(Job() + Dispatchers.IO)
     private val apiService = AvatarApiService()
 
-    @OptIn(ExperimentalPagingApi::class)
+    val switch = DataStore.switch
+
     val pager = Pager(
         PagingConfig(
             pageSize = PAGE_COUNT,
             enablePlaceholders = true
         ),
-        //remoteMediator = AvatarRemoteMediator(PAGE_COUNT, apiService)
     ) { AvatarPagingSource(apiService, PAGE_COUNT) }
         .flow
         .cachedIn(viewModelScope)
@@ -53,11 +54,13 @@ class AvatarViewModel {
 fun ATLAScreen() {
     val vm: AvatarViewModel = remember { AvatarViewModel() }
     val lazyPagingItems = vm.pager.collectAsLazyPagingItems()
+    val scope = rememberCoroutineScope()
+    val switch by vm.switch.flow.collectAsState(true)
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Avatar: The Last Airbender") },
+                title = { Text("Beer") },
                 actions = { Text(animateIntAsState(lazyPagingItems.itemCount).value.toString()) }
             )
         },
@@ -66,6 +69,16 @@ fun ATLAScreen() {
                 IconButton(
                     onClick = lazyPagingItems::refresh
                 ) { Icon(Icons.Default.Refresh, null) }
+
+                IconToggleButton(
+                    checked = switch,
+                    onCheckedChange = { scope.launch { vm.switch.update(it) } }
+                ) {
+                    Icon(
+                        if (switch) Icons.Default.TextIncrease else Icons.Default.TextDecrease,
+                        null
+                    )
+                }
             }
         }
     ) { p ->
@@ -78,7 +91,8 @@ fun ATLAScreen() {
                 item {
                     Text(
                         text = "Waiting for items to load from the backend",
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
                             .wrapContentWidth(Alignment.CenterHorizontally)
                     )
                 }
@@ -88,14 +102,15 @@ fun ATLAScreen() {
                 count = lazyPagingItems.itemCount,
             ) {
                 lazyPagingItems[it]
-                    ?.let { character -> AvatarCard(character) }
+                    ?.let { character -> AvatarCard(character, switch) }
                     ?: run { AvatarPlaceholderCard() }
             }
 
             if (lazyPagingItems.loadState.append == LoadState.Loading) {
                 item {
                     CircularProgressIndicator(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
                             .wrapContentWidth(Alignment.CenterHorizontally)
                     )
                 }
@@ -105,20 +120,29 @@ fun ATLAScreen() {
 }
 
 @Composable
-fun AvatarCard(item: Beer) {
-    Card {
+fun AvatarCard(item: Beer, showDescription: Boolean) {
+    OutlinedCard {
         ListItem(
             headlineContent = { Text(item.name) },
-            supportingContent = { Text(item.description) },
+            supportingContent = {
+                AnimatedVisibility(
+                    visible = showDescription,
+                    enter = slideInVertically() + expandVertically(),
+                    exit = slideOutVertically() + shrinkVertically()
+                ) {
+                    Text(item.description)
+                }
+            },
             leadingContent = {
                 Surface(shape = CircleShape) {
                     KamelImage(
-                        resource = asyncPainterResource(item.imageUrl),
+                        resource = asyncPainterResource(item.imageUrl.orEmpty()),
                         contentDescription = null,
                         modifier = Modifier.size(75.dp)
                     )
                 }
-            }
+            },
+            modifier = Modifier.animateContentSize()
         )
     }
 }
